@@ -93,11 +93,11 @@ def shorten_url(data: URLRequest):
     connection.commit()
     connection.close()
 
-return {
+    return {
     "original_url": data.original_url,
     "short_code": short_code,
     "short_url": f"https://url-shortener-pdnj.onrender.com/{short_code}"
-}
+    }
 
 
 # ---------------- GET ALL URLS ----------------
