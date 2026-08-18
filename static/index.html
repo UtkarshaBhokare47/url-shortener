@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>QuickLink - URL Shortener</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 25px;
+            padding: 45px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .logo {
+            font-size: 55px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #222;
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 35px;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex: 1;
+            padding: 16px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 16px 22px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        #result {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .result-box {
+            background: #f4f6ff;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .result-title {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .short-url {
+            color: #667eea;
+            font-weight: bold;
+            word-break: break-all;
+            margin-bottom: 15px;
+        }
+
+        .copy-btn {
+            background: #222;
+            padding: 10px 18px;
+            font-size: 13px;
+        }
+
+        .message {
+            margin-top: 15px;
+            color: #e74c3c;
+            font-size: 14px;
+        }
+
+        .features {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .feature {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .feature span {
+            font-size: 22px;
+        }
+
+        .footer {
+            margin-top: 25px;
+            color: #888;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+
+            .card {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 30px;
+            }
+
+            .input-box {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .features {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <div class="card">
+
+            <div class="logo">🔗</div>
+
+            <h1>QuickLink</h1>
+
+            <p class="subtitle">
+                Shorten your long URLs instantly and easily.
+            </p>
+
+
+            <div class="input-box">
+
+                <input
+                    type="text"
+                    id="url"
+                    placeholder="Paste your long URL here..."
+                >
+
+                <button onclick="shortenURL()">
+                    Shorten
+                </button>
+
+            </div>
+
+
+            <div id="result">
+
+                <div class="result-box">
+
+                    <div class="result-title">
+                        Your shortened URL
+                    </div>
+
+                    <div
+                        class="short-url"
+                        id="shortUrl">
+                    </div>
+
+                    <button
+                        class="copy-btn"
+                        onclick="copyURL()">
+                        📋 Copy URL
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="message"
+                class="message">
+            </div>
+
+
+            <div class="features">
+
+                <div class="feature">
+                    <span>⚡</span>
+                    Fast
+                </div>
+
+                <div class="feature">
+                    <span>🔒</span>
+                    Simple
+                </div>
+
+                <div class="feature">
+                    <span>🚀</span>
+                    Easy
+                </div>
+
+            </div>
+
+
+            <div class="footer">
+                Powered by FastAPI & SQLite
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        let currentShortURL = "";
+
+
+        async function shortenURL() {
+
+            const url =
+                document.getElementById("url").value.trim();
+
+            const message =
+                document.getElementById("message");
+
+            const result =
+                document.getElementById("result");
+
+
+            message.innerText = "";
+            result.style.display = "none";
+
+
+            if (!url) {
+
+                message.innerText =
+                    "Please enter a URL.";
+
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch("/shorten", {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            original_url: url
+                        })
+
+                    });
+
+
+                const data =
+                    await response.json();
+
+
+                if (data.short_url) {
+
+                    currentShortURL =
+                        data.short_url;
+
+
+                    document.getElementById(
+                        "shortUrl"
+                    ).innerHTML =
+                        `<a href="${data.short_url}"
+                            target="_blank">
+                            ${data.short_url}
+                        </a>`;
+
+
+                    result.style.display =
+                        "block";
+
+                } else {
+
+                    message.innerText =
+                        "Unable to shorten this URL.";
+
+                }
+
+
+            } catch (error) {
+
+                message.innerText =
+                    "Server connection failed.";
+
+            }
+
+        }
+
+
+        function copyURL() {
+
+            navigator.clipboard.writeText(
+                currentShortURL
+            );
+
+            alert("Short URL copied! ✅");
+
+        }
+
+    </script>
+
+</body>
+
+</html>
